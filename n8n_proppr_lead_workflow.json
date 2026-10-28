@@ -1,0 +1,389 @@
+{
+  "name": "Proppr - Real Estate Lead Ingestion & Deduplication Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "proppr-lead-intake",
+        "options": {}
+      },
+      "id": "node-webhook-intake",
+      "name": "Inbound Lead Webhook (Website / WhatsApp / Meta Ads)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "proppr-leads-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Proppr Lead Data Normalization & Currency Parser\nconst raw = $json.body || $json;\n\n// 1. Phone Normalization (Indian 10-digit standard)\nlet phone = (raw.phone_number || raw.phone || '').toString().replace(/\\D/g, '');\nif (phone.length === 12 && phone.startsWith('91')) phone = phone.substring(2);\nif (phone.length === 11 && phone.startsWith('0')) phone = phone.substring(1);\n\n// 2. Budget Parser (Handles ₹ Cr, Lakhs, numerical)\nfunction parseBudget(budgetStr) {\n  if (!budgetStr) return 0;\n  if (typeof budgetStr === 'number') return budgetStr;\n  const str = budgetStr.toString().toLowerCase();\n  const match = str.match(/(\\d+(?:\\.\\d+)?)/);\n  if (!match) return 0;\n  const val = parseFloat(match[1]);\n  if (str.includes('cr') || str.includes('crore')) return val * 10000000;\n  if (str.includes('lakh') || str.includes('lac') || str.includes('l')) return val * 100000;\n  return val;\n}\n\nconst budgetInr = parseBudget(raw.budget);\nconst location = (raw.location || '').trim();\nconst isGurgaon = location.toLowerCase() === 'gurgaon';\nconst isPriority = isGurgaon && (budgetInr >= 15000000);\n\nreturn {\n  lead_id: raw.lead_id || Date.now(),\n  name: (raw.name || 'Valued Lead').trim(),\n  phone_number: phone,\n  raw_phone: raw.phone_number,\n  location: location || 'Unspecified',\n  budget_raw: raw.budget || 'Not provided',\n  budget_inr: budgetInr,\n  source: raw.source || 'Website',\n  enquiry_date: raw.enquiry_date || new Date().toISOString(),\n  is_priority: isPriority,\n  priority_tag: isPriority ? 'HIGH PRIORITY (Gurgaon >= ₹1.5 Cr)' : 'STANDARD',\n  assigned_desk: isGurgaon ? (isPriority ? 'Gurgaon Senior Advisory' : 'Gurgaon Residential') : (location.toLowerCase() === 'goa' ? 'Goa Luxury Desk' : 'General Sales'),\n  ingested_at: new Date().toISOString()\n};"
+      },
+      "id": "node-clean-data",
+      "name": "Normalize Phone & Parse Indian Budget",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "proppr_master_leads_sheet_id",
+        "range": "Raw_Ingestion_Audit!A:H",
+        "options": {}
+      },
+      "id": "node-raw-buffer-sheet",
+      "name": "Buffer to Google Sheet (Zero-Loss Audit)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "search",
+        "filter": "phone={{ $json.phone_number }}"
+      },
+      "id": "node-check-crm-dup",
+      "name": "Search CRM Contact by Phone",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.crm_contact_exists }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "node-if-duplicate",
+      "name": "Duplicate Contact Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "engagement",
+        "operation": "createNote",
+        "contactId": "={{ $json.crm_contact_id }}",
+        "note": "=Repeat enquiry received from {{ $node['Normalize Phone & Parse Indian Budget'].json.source }} on {{ $node['Normalize Phone & Parse Indian Budget'].json.enquiry_date }}. Location: {{ $node['Normalize Phone & Parse Indian Budget'].json.location }}, Budget: {{ $node['Normalize Phone & Parse Indian Budget'].json.budget_raw }}."
+      },
+      "id": "node-append-dup-note",
+      "name": "CRM: Append Touchpoint Note",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "#leads-repeat-touchpoints",
+        "text": "=🔄 *Repeat Lead Touchpoint Detected*\n*Name:* {{ $node['Normalize Phone & Parse Indian Budget'].json.name }}\n*Phone:* {{ $node['Normalize Phone & Parse Indian Budget'].json.phone_number }}\n*New Source:* {{ $node['Normalize Phone & Parse Indian Budget'].json.source }}\n*Location:* {{ $node['Normalize Phone & Parse Indian Budget'].json.location }}\n*Budget:* {{ $node['Normalize Phone & Parse Indian Budget'].json.budget_raw }}\n_Note appended to existing CRM record #{{ $json.crm_contact_id }}_"
+      },
+      "id": "node-slack-dup-alert",
+      "name": "Notify Sales Agent of Repeat Activity",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        1580,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $node['Normalize Phone & Parse Indian Budget'].json.is_priority }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "node-if-priority",
+      "name": "Is High Priority Gurgaon (>= ₹1.5 Cr)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "additionalFields": {
+          "firstname": "={{ $node['Normalize Phone & Parse Indian Budget'].json.name }}",
+          "phone": "={{ $node['Normalize Phone & Parse Indian Budget'].json.phone_number }}",
+          "preferred_location": "={{ $node['Normalize Phone & Parse Indian Budget'].json.location }}",
+          "budget": "={{ $node['Normalize Phone & Parse Indian Budget'].json.budget_raw }}",
+          "lead_source": "={{ $node['Normalize Phone & Parse Indian Budget'].json.source }}",
+          "lead_status": "New",
+          "priority": "HIGH",
+          "sla_target": "15 Minutes"
+        }
+      },
+      "id": "node-crm-vip-lead",
+      "name": "CRM: Create VIP Contact (Status: New)",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "#leads-gurgaon-vip",
+        "text": "=🚨 *HIGH-PRIORITY LEAD RECEIVED (Gurgaon >= ₹1.5 Cr)*\n*Name:* {{ $node['Normalize Phone & Parse Indian Budget'].json.name }}\n*Phone:* {{ $node['Normalize Phone & Parse Indian Budget'].json.phone_number }}\n*Budget:* {{ $node['Normalize Phone & Parse Indian Budget'].json.budget_raw }} (₹{{ $node['Normalize Phone & Parse Indian Budget'].json.budget_inr.toLocaleString('en-IN') }})\n*Source:* {{ $node['Normalize Phone & Parse Indian Budget'].json.source }}\n*Assigned Team:* {{ $node['Normalize Phone & Parse Indian Budget'].json.assigned_desk }}\n*Action Required:* Contact within 15-minute SLA."
+      },
+      "id": "node-slack-vip-alert",
+      "name": "Urgent Slack Alert to Gurgaon VIP Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "additionalFields": {
+          "firstname": "={{ $node['Normalize Phone & Parse Indian Budget'].json.name }}",
+          "phone": "={{ $node['Normalize Phone & Parse Indian Budget'].json.phone_number }}",
+          "preferred_location": "={{ $node['Normalize Phone & Parse Indian Budget'].json.location }}",
+          "budget": "={{ $node['Normalize Phone & Parse Indian Budget'].json.budget_raw }}",
+          "lead_source": "={{ $node['Normalize Phone & Parse Indian Budget'].json.source }}",
+          "lead_status": "New",
+          "priority": "Standard",
+          "sla_target": "2 Hours"
+        }
+      },
+      "id": "node-crm-std-lead",
+      "name": "CRM: Create Standard Contact (Status: New)",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "={{ $node['Normalize Phone & Parse Indian Budget'].json.location.toLowerCase() === 'goa' ? '#leads-goa' : '#leads-gurgaon' }}",
+        "text": "=📋 *New Lead Received*\n*Name:* {{ $node['Normalize Phone & Parse Indian Budget'].json.name }}\n*Phone:* {{ $node['Normalize Phone & Parse Indian Budget'].json.phone_number }}\n*Location:* {{ $node['Normalize Phone & Parse Indian Budget'].json.location }}\n*Budget:* {{ $node['Normalize Phone & Parse Indian Budget'].json.budget_raw }}\n*Source:* {{ $node['Normalize Phone & Parse Indian Budget'].json.source }}\n*Assigned Desk:* {{ $node['Normalize Phone & Parse Indian Budget'].json.assigned_desk }}"
+      },
+      "id": "node-slack-std-alert",
+      "name": "Notify Location Desk (Goa / Gurgaon)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        520
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "node-error-trigger",
+      "name": "Error Trigger (On Workflow Failure)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "proppr_master_leads_sheet_id",
+        "range": "Failed_Leads_DLQ!A:F",
+        "options": {}
+      },
+      "id": "node-dlq-log",
+      "name": "Log to Dead Letter Queue (DLQ Sheet)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        460,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "#ops-automation-alerts",
+        "text": "=⚠️ *PROMPT ACTION NEEDED: Lead Workflow Failure*\n*Failed Node:* {{ $json.execution.error.node.name }}\n*Error Message:* {{ $json.execution.error.message }}\n*Execution ID:* {{ $json.execution.id }}\n*Lead Data:* {{ JSON.stringify($json.execution.data) }}\n_Data safely captured in Dead Letter Queue (DLQ). Immediate manual review required._"
+      },
+      "id": "node-slack-fail-alert",
+      "name": "Alert Tech & Ops Channel of Failure",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        680,
+        740
+      ]
+    }
+  ],
+  "connections": {
+    "Inbound Lead Webhook (Website / WhatsApp / Meta Ads)": {
+      "main": [
+        [
+          {
+            "node": "Normalize Phone & Parse Indian Budget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Phone & Parse Indian Budget": {
+      "main": [
+        [
+          {
+            "node": "Buffer to Google Sheet (Zero-Loss Audit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer to Google Sheet (Zero-Loss Audit)": {
+      "main": [
+        [
+          {
+            "node": "Search CRM Contact by Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search CRM Contact by Phone": {
+      "main": [
+        [
+          {
+            "node": "Duplicate Contact Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate Contact Found?": {
+      "main": [
+        [
+          {
+            "node": "CRM: Append Touchpoint Note",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is High Priority Gurgaon (>= ₹1.5 Cr)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM: Append Touchpoint Note": {
+      "main": [
+        [
+          {
+            "node": "Notify Sales Agent of Repeat Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is High Priority Gurgaon (>= ₹1.5 Cr)?": {
+      "main": [
+        [
+          {
+            "node": "CRM: Create VIP Contact (Status: New)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CRM: Create Standard Contact (Status: New)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM: Create VIP Contact (Status: New)": {
+      "main": [
+        [
+          {
+            "node": "Urgent Slack Alert to Gurgaon VIP Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM: Create Standard Contact (Status: New)": {
+      "main": [
+        [
+          {
+            "node": "Notify Location Desk (Goa / Gurgaon)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger (On Workflow Failure)": {
+      "main": [
+        [
+          {
+            "node": "Log to Dead Letter Queue (DLQ Sheet)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Dead Letter Queue (DLQ Sheet)": {
+      "main": [
+        [
+          {
+            "node": "Alert Tech & Ops Channel of Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

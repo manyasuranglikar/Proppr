@@ -1,0 +1,90 @@
+[
+  {
+    "lead_id": 101,
+    "name": "Rahul Sharma",
+    "phone_number": "9876543210",
+    "location": "Gurgaon",
+    "budget_raw": "₹1.5 Cr",
+    "budget_inr": 15000000.0,
+    "primary_source": "Website",
+    "touchpoint_sources": [
+      "Website",
+      "Advertisement"
+    ],
+    "touchpoint_count": 2,
+    "first_enquiry_date": "2026-10-28 10:15:00",
+    "last_enquiry_date": "2026-10-28 14:45:00",
+    "follow_up_status": "New",
+    "is_priority": true,
+    "priority_label": "HIGH PRIORITY (Gurgaon >= ₹1.5 Cr)",
+    "assigned_team": "Gurgaon Senior Advisory Team",
+    "enquiry_history": [
+      {
+        "lead_id": 101,
+        "source": "Website",
+        "date": "2026-10-28 10:15:00",
+        "budget": "₹1.5 Cr"
+      },
+      {
+        "lead_id": 103,
+        "source": "Advertisement",
+        "date": "2026-10-28 14:45:00",
+        "budget": "₹1.5 Cr"
+      }
+    ]
+  },
+  {
+    "lead_id": 102,
+    "name": "Priya Mehta",
+    "phone_number": "9876543211",
+    "location": "Goa",
+    "budget_raw": "₹90 Lakh",
+    "budget_inr": 9000000.0,
+    "primary_source": "WhatsApp",
+    "touchpoint_sources": [
+      "WhatsApp"
+    ],
+    "touchpoint_count": 1,
+    "first_enquiry_date": "2026-10-28 11:30:00",
+    "last_enquiry_date": "2026-10-28 11:30:00",
+    "follow_up_status": "New",
+    "is_priority": false,
+    "priority_label": "STANDARD (Goa Luxury Advisory)",
+    "assigned_team": "Goa Holiday & Luxury Advisory Desk",
+    "enquiry_history": [
+      {
+        "lead_id": 102,
+        "source": "WhatsApp",
+        "date": "2026-10-28 11:30:00",
+        "budget": "₹90 Lakh"
+      }
+    ]
+  },
+  {
+    "lead_id": 104,
+    "name": "Amit Verma",
+    "phone_number": "9876543212",
+    "location": "Gurgaon",
+    "budget_raw": "₹2 Cr",
+    "budget_inr": 20000000.0,
+    "primary_source": "Website",
+    "touchpoint_sources": [
+      "Website"
+    ],
+    "touchpoint_count": 1,
+    "first_enquiry_date": "2026-10-28 16:00:00",
+    "last_enquiry_date": "2026-10-28 16:00:00",
+    "follow_up_status": "New",
+    "is_priority": true,
+    "priority_label": "HIGH PRIORITY (Gurgaon >= ₹1.5 Cr)",
+    "assigned_team": "Gurgaon Senior Advisory Team",
+    "enquiry_history": [
+      {
+        "lead_id": 104,
+        "source": "Website",
+        "date": "2026-10-28 16:00:00",
+        "budget": "₹2 Cr"
+      }
+    ]
+  }
+]

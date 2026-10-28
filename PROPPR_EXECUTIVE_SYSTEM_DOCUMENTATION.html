@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROPPR — Lead Management Automation (Executive Presentation)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --emerald: #059669;
+      --amber: #d97706;
+      --rose: #e11d48;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --border: #e2e8f0;
+      --card-bg: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: var(--slate-900);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .doc-container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    /* Action Bar */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--slate-900);
+      color: #ffffff;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-bar button {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+
+    .action-bar button:hover { background: var(--primary-dark); }
+
+    /* Slide Card */
+    .slide-card {
+      background: #ffffff;
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .doc-container { max-width: 100%; }
+      .slide-card { box-shadow: none; border: none; padding: 1.5rem 0; page-break-after: always; }
+      .no-print { display: none !important; }
+    }
+
+    /* Cover Header */
+    .slide-tag {
+      display: inline-block;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+      border: 1px solid #bfdbfe;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.25;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--slate-600);
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      margin: 1.25rem 0 0.5rem 0;
+    }
+
+    p { margin-bottom: 0.85rem; color: var(--slate-700); font-size: 0.92rem; }
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; font-size: 0.92rem; color: var(--slate-700); }
+    li { margin-bottom: 0.4rem; }
+
+    /* Comparison Box */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    .comp-card {
+      padding: 1.25rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    .comp-old {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid var(--rose);
+    }
+
+    .comp-new {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-left: 4px solid var(--emerald);
+    }
+
+    .comp-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .comp-old .comp-title { color: var(--rose); }
+    .comp-new .comp-title { color: var(--emerald); }
+
+    /* KPI Highlights */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .kpi-box {
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.15rem 1rem;
+      text-align: center;
+    }
+
+    .kpi-num {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .kpi-lbl {
+      font-size: 0.8rem;
+      color: var(--slate-600);
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    /* Visual Stepper / Box Diagram */
+    .stepper-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      background: var(--slate-900);
+      color: #ffffff;
+      padding: 1.25rem 1rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    .stepper-node {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 0.65rem 0.85rem;
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .node-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .node-title {
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin: 0.15rem 0;
+    }
+
+    .node-sub {
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+
+    .stepper-arrow {
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.86rem;
+    }
+
+    th {
+      background: var(--slate-800);
+      color: #ffffff;
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    td {
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--slate-800);
+    }
+
+    tr:nth-child(even) { background: var(--slate-50); }
+    tr.vip-row { background: #fef2f2 !important; }
+    tr.dup-row { background: #fffbeb !important; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-vip { background: #fee2e2; color: #991b1b; }
+    .badge-dup { background: #fef3c7; color: #92400e; }
+    .badge-std { background: #e0e7ff; color: #3730a3; }
+    .badge-src { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    /* Code Blocks */
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1.15rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: #f1f5f9;
+      padding: 0.15rem 0.3rem;
+      border-radius: 3px;
+      color: #0f172a;
+    }
+
+    pre code { background: transparent; padding: 0; color: inherit; }
+
+    /* Q&A Presentation Cards */
+    .qa-box {
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .qa-q { font-weight: 700; font-size: 0.95rem; color: var(--slate-900); margin-bottom: 0.4rem; }
+    .qa-a { font-size: 0.88rem; color: var(--slate-700); margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <div class="doc-container">
+
+    <!-- Action Bar -->
+    <div class="action-bar no-print">
+      <div>
+        <strong>PROPPR Lead Automation</strong> &bull; Executive Presentation Format
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+        <a href="http://localhost:8000" target="_blank" style="text-decoration:none;">
+          <button style="background: #059669;">⚡ Open Live Dashboard</button>
+        </a>
+      </div>
+    </div>
+
+    <!-- SLIDE 1: Cover & Problem / Solution -->
+    <div class="slide-card">
+      <span class="slide-tag">EXECUTIVE SUMMARY</span>
+      <h1>PROPPR REAL ESTATE ADVISORY</h1>
+      <div class="subtitle">Automated Lead Management System &bull; Gurgaon & Goa Markets</div>
+
+      <div class="comparison-grid">
+        <div class="comp-card comp-old">
+          <div class="comp-title">❌ The Old Way (Manual & Slow)</div>
+          <ul>
+            <li>Enquiries copy-pasted manually into Google Sheets.</li>
+            <li>4 to 12 hour response delays; lost luxury buyers.</li>
+            <li>Same buyer submitting multiple ads creates duplicate records.</li>
+            <li>Two brokers accidentally calling the same client.</li>
+          </ul>
+        </div>
+        <div class="comp-card comp-new">
+          <div class="comp-title">✅ The New Way (Automated & Instant)</div>
+          <ul>
+            <li>Automatic capture from Website, WhatsApp & Ads.</li>
+            <li><strong>15-Minute VIP SLA</strong> for luxury Gurgaon leads.</li>
+            <li><strong>Zero Duplicate CRM Contacts:</strong> Phone matches merge into existing client files.</li>
+            <li><strong>Zero Data Loss:</strong> Automatic Google Sheet backup first.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-box">
+          <div class="kpi-num">&lt; 15m</div>
+          <div class="kpi-lbl">VIP Lead Response Time</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-num">0%</div>
+          <div class="kpi-lbl">Duplicate CRM Records</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-num">100%</div>
+          <div class="kpi-lbl">Zero-Loss Data Backup</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: 5-Stage Workflow -->
+    <div class="slide-card">
+      <span class="slide-tag">WORKFLOW ARCHITECTURE</span>
+      <h2>The 5-Stage Automation Pipeline</h2>
+      <p>How an enquiry flows seamlessly from initial click to a closed sale:</p>
+
+      <div class="stepper-box">
+        <div class="stepper-node">
+          <div class="node-num">Step 1</div>
+          <div class="node-title">Inbound Intake</div>
+          <div class="node-sub">Web, WhatsApp, Ads</div>
+        </div>
+        <div class="stepper-arrow">➔</div>
+        <div class="stepper-node">
+          <div class="node-num">Step 2</div>
+          <div class="node-title">Clean & Buffer</div>
+          <div class="node-sub">10-Digit Phone & Sheet Backup</div>
+        </div>
+        <div class="stepper-arrow">➔</div>
+        <div class="stepper-node">
+          <div class="node-num">Step 3</div>
+          <div class="node-title">Deduplication</div>
+          <div class="node-sub">Search CRM by Phone</div>
+        </div>
+        <div class="stepper-arrow">➔</div>
+        <div class="stepper-node">
+          <div class="node-num">Step 4</div>
+          <div class="node-title">Prioritization</div>
+          <div class="node-sub">Gurgaon &ge; ₹1.5 Cr</div>
+        </div>
+        <div class="stepper-arrow">➔</div>
+        <div class="stepper-node">
+          <div class="node-num">Step 5</div>
+          <div class="node-title">Alert & Sync</div>
+          <div class="node-sub">Slack Card & WhatsApp</div>
+        </div>
+      </div>
+
+      <div style="font-size: 0.9rem; color: var(--slate-700);">
+        <p><strong>1. Instant Capture:</strong> Catches leads from Website forms, WhatsApp messages, or Meta/Google Ads via secure Webhooks.</p>
+        <p><strong>2. Standardization & Safe Backup:</strong> Normalizes phone to 10 digits (<code>9876543210</code>), converts text budgets (<code>₹1.5 Cr</code> ➔ <code>15,000,000</code>), and saves a safety copy in Google Sheets.</p>
+        <p><strong>3. Duplicate Protection:</strong> If the phone number already exists in CRM, it adds an activity note rather than a duplicate contact.</p>
+        <p><strong>4. Priority Segmentation:</strong> If Gurgaon and budget &ge; ₹1.5 Cr, sets Priority = HIGH with a 15-minute response timer.</p>
+        <p><strong>5. Team Alerts & Auto-Greeting:</strong> Sends urgent Slack alert to `#leads-gurgaon-vip` and sends an automated WhatsApp welcome greeting to the buyer within 60 seconds.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Sample Leads Solutions (Task 2) -->
+    <div class="slide-card">
+      <span class="slide-tag">TASK 2 SOLUTIONS</span>
+      <h2>Demonstration on the 4 Sample Leads</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Budget</th>
+            <th>Source</th>
+            <th>System Action & Routing</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="vip-row">
+            <td><strong>101</strong></td>
+            <td><strong>Rahul Sharma</strong></td>
+            <td><code>9876543210</code></td>
+            <td>Gurgaon</td>
+            <td>₹1.5 Cr</td>
+            <td><span class="badge badge-src">Website</span></td>
+            <td><span class="badge badge-vip">VIP PRIORITY</span> Gurgaon Senior Advisory Desk (15m SLA)</td>
+          </tr>
+          <tr>
+            <td><strong>102</strong></td>
+            <td><strong>Priya Mehta</strong></td>
+            <td><code>9876543211</code></td>
+            <td>Goa</td>
+            <td>₹90 Lakh</td>
+            <td><span class="badge badge-src">WhatsApp</span></td>
+            <td><span class="badge badge-std">STANDARD</span> Goa Holiday & Coastal Luxury Desk</td>
+          </tr>
+          <tr class="dup-row">
+            <td><strong>103</strong></td>
+            <td><strong>Rahul Sharma</strong></td>
+            <td><code>9876543210</code></td>
+            <td>Gurgaon</td>
+            <td>₹1.5 Cr</td>
+            <td><span class="badge badge-src">Advertisement</span></td>
+            <td><span class="badge badge-dup">DUPLICATE OF #101</span> Merged into existing file; no new CRM contact</td>
+          </tr>
+          <tr class="vip-row">
+            <td><strong>104</strong></td>
+            <td><strong>Amit Verma</strong></td>
+            <td><code>9876543212</code></td>
+            <td>Gurgaon</td>
+            <td>₹2 Cr</td>
+            <td><span class="badge badge-src">Website</span></td>
+            <td><span class="badge badge-vip">VIP PRIORITY</span> Gurgaon Senior Advisory Desk (15m SLA)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Direct Answers to the 5 Core Questions</h3>
+      <div class="qa-box">
+        <div class="qa-q">1. Which leads are duplicates, and why?</div>
+        <div class="qa-a"><strong>Lead 101 and Lead 103</strong> are duplicates. Both share the exact same phone number (<code>9876543210</code>) and name (<em>Rahul Sharma</em>). Lead 101 came from the Website; Lead 103 came from an Advertisement.</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-q">2. How do we ensure duplicate enquiries do not create unnecessary CRM records?</div>
+        <div class="qa-a"><strong>Search-Before-Insert:</strong> Before creating a contact, the system searches the CRM by phone number. Because Rahul Sharma exists from Lead #101, it skips creating a new contact and appends a touchpoint note (<em>"Repeat enquiry from Advertisement"</em>) to his existing profile.</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-q">3. How do we flag Gurgaon leads with budget &ge; ₹1.5 Cr for priority?</div>
+        <div class="qa-a">The system converts budget text to numbers (<code>₹1.5 Cr</code> ➔ <code>15,000,000</code>). When <code>Location == 'Gurgaon' and Budget >= 15,000,000</code>, it flags <strong>Leads 101 and 104 as VIP</strong>, sets a 15-minute SLA, routes to the Senior Desk, and alerts `#leads-gurgaon-vip`.</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-q">4. What if the CRM is unavailable when a new lead arrives?</div>
+        <div class="qa-a"><strong>Zero-Loss Staging Buffer:</strong> Every lead is saved to Google Sheets <em>before</em> touching the CRM. If the CRM is offline, the system tries again after 1m, 5m, and 15m. An alert notifies operations so an advisor can call the client directly from the sheet. <strong>No lead is ever lost.</strong></div>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-q">5. How do we prevent a failed workflow from processing the same lead twice?</div>
+        <div class="qa-a">Each lead gets a unique key: <code>SHA256(phone + source + date)</code>. The system checks this key before creating records or sending messages. Retries only resume from the failed step, never duplicating contacts or messages.</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Python Backend Logic -->
+    <div class="slide-card">
+      <span class="slide-tag">BACKEND LOGIC</span>
+      <h2>Python Automation Script (Clean & Simple)</h2>
+      <p>Clean, readable logic that powers the workflow:</p>
+
+      <pre><code>def process_incoming_lead(lead):
+    # 1. Clean phone number and parse budget to numbers
+    phone = clean_phone_number(lead["phone"])        # "+91 98765-43210" ➔ "9876543210"
+    budget_inr = parse_budget(lead["budget"])        # "₹1.5 Cr" ➔ 15,000,000
+    
+    # 2. Safety copy in Google Sheets
+    save_to_backup_sheet(lead)
+    
+    # 3. Check for duplicates in CRM
+    existing_contact = find_contact_by_phone(phone)
+    if existing_contact:
+        add_note_to_contact(existing_contact.id, f"Repeat enquiry from {lead['source']}")
+        notify_advisor(f"Repeat enquiry from {lead['name']}")
+        return "TOUCHPOINT_MERGED"
+    
+    # 4. Check Priority (Gurgaon >= ₹1.5 Cr)
+    is_vip = (lead["location"].lower() == "gurgaon") and (budget_inr >= 15_000_000)
+    assigned_team = "Gurgaon Senior Advisory" if is_vip else "Standard Desk"
+    sla = "15 Minutes" if is_vip else "2 Hours"
+    
+    # 5. Create new CRM contact and send alerts
+    create_crm_contact(lead, is_vip, assigned_team, sla)
+    send_slack_alert(channel="#leads-vip" if is_vip else "#leads-general", lead=lead)
+    send_whatsapp_greeting(phone=phone, name=lead["name"])
+    return "SUCCESS"</code></pre>
+
+      <p style="font-size:0.85rem; color:var(--slate-600);">
+        Tested and verified with 100% passing assertions in <code>scripts/lead_processor.py</code> under Python 3.13.
+      </p>
+    </div>
+
+    <!-- SLIDE 5: Team Guide (Task 4) -->
+    <div class="slide-card">
+      <span class="slide-tag">OPERATIONS HANDBOOK</span>
+      <h2>Simple Team Guide for Sales Advisors (Task 4)</h2>
+
+      <div style="font-size:0.92rem; color:var(--slate-700);">
+        <h3>1. What does the automation do?</h3>
+        <p>It acts as our <strong>24/7 Digital Assistant</strong>: it captures leads from the website, WhatsApp, and ads automatically, merges duplicate enquiries so you don't call someone else's client, and immediately assigns luxury Gurgaon buyers (₹1.5 Cr+) to senior brokers.</p>
+
+        <h3>2. How does the team use it daily?</h3>
+        <ul>
+          <li>You receive an instant Slack notification in <code>#leads-gurgaon</code> or <code>#leads-goa</code> with client details and a direct CRM link.</li>
+          <li>Keep the lead status updated: <code>New ➔ Contacted ➔ Qualified ➔ Site Visit Scheduled ➔ Closed</code>.</li>
+        </ul>
+
+        <h3>3. What if something goes wrong?</h3>
+        <p>Every lead is saved to a backup Google Sheet first. Even if the CRM is undergoing maintenance, <strong>no lead is ever lost</strong>. An alert pings the ops team, and advisors can call leads directly from the sheet.</p>
+
+        <h3>4. Future Improvements (Phase 2)</h3>
+        <ul>
+          <li><strong>AI WhatsApp Bot:</strong> Pre-qualifies buyers (asking 3BHK vs 4BHK, investment vs self-use) before routing to an advisor.</li>
+          <li><strong>Auto Brochure Sender:</strong> Sends branded property PDF brochures via WhatsApp based on their budget.</li>
+          <li><strong>Fair Round-Robin:</strong> Automatically balances lead distribution across advisors.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

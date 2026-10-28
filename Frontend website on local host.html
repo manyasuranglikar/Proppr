@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proppr Lead Management & Automation Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-logo">
+        <span class="logo-icon">🏢</span>
+        <div class="logo-text">
+          <span class="logo-title">PROPPR</span>
+          <span class="logo-sub">Automated Lead Management System</span>
+        </div>
+      </div>
+      <div class="badge-tag live-badge">
+        <span class="pulse-dot"></span> Pipeline Active
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="market-pill">
+        <span class="pill-dot gurgaon"></span> Gurgaon
+        <span class="pill-separator">•</span>
+        <span class="pill-dot goa"></span> Goa
+      </div>
+      <button class="btn btn-outline" id="btnViewDocs">Assignment Submission Report</button>
+      <a href="#pipeline-demo" class="btn btn-primary">Launch Live Simulator</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-kicker">AUTOMATION & WORKFLOW ARCHITECTURE</span>
+      <h1>Intelligent Real Estate Lead Ingestion, Deduplication & Routing</h1>
+      <p class="hero-desc">
+        A resilient multi-channel automation system capturing enquiries across <strong>Website, WhatsApp, and Online Ads</strong>.
+        Features deterministic Indian currency parsing, phone-based contact deduplication, Gurgaon VIP priority tagging, and zero-loss circuit breaking.
+      </p>
+      <div class="hero-metrics">
+        <div class="metric-card">
+          <div class="metric-val" id="metricTotal">4</div>
+          <div class="metric-lbl">Total Sample Leads</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val text-success" id="metricUnique">3</div>
+          <div class="metric-lbl">Unique CRM Contacts</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val text-warning" id="metricDuplicates">1</div>
+          <div class="metric-lbl">Duplicates Intercepted</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val text-vip" id="metricPriority">2</div>
+          <div class="metric-lbl">High-Priority VIP Leads</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="tab-simulator">⚡ Live Interactive Simulator</button>
+    <button class="nav-tab" data-tab="tab-workflow">🗺️ Workflow Architecture (Task 1 & 3A)</button>
+    <button class="nav-tab" data-tab="tab-task2">🧠 Automation Logic & Q&A (Task 2)</button>
+    <button class="nav-tab" data-tab="tab-code">💻 Python & JS Implementation (Task 3B)</button>
+    <button class="nav-tab" data-tab="tab-team-docs">📖 Team Operations Guide (Task 4)</button>
+  </nav>
+
+  <!-- TAB 1: LIVE INTERACTIVE SIMULATOR -->
+  <main class="tab-content active" id="tab-simulator">
+    <div class="simulator-layout">
+      <!-- Left Column: Controls & Inbound Queue -->
+      <div class="sim-sidebar">
+        <div class="card">
+          <div class="card-header">
+            <h3>📥 Inbound Lead Sources</h3>
+            <span class="badge" id="queueCountBadge">4 Leads</span>
+          </div>
+          <div class="card-body">
+            <p class="text-muted text-sm mb-3">Sample enquiries received from Website, WhatsApp, and Meta/Google Ads.</p>
+            <div class="inbound-list" id="inboundLeadList">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div class="sim-actions mt-4">
+              <button class="btn btn-primary btn-block" id="btnRunPipeline" onclick="runAutomationPipeline()">
+                <span>▶ Run Full Automation Pipeline</span>
+              </button>
+              <button class="btn btn-secondary btn-block mt-2" id="btnResetPipeline" onclick="resetPipeline()">
+                <span>↺ Reset Pipeline State</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Custom Lead Modal Card -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3>➕ Ingest Custom Test Lead</h3>
+          </div>
+          <div class="card-body">
+            <form id="customLeadForm">
+              <div class="form-group">
+                <label>Prospect Name</label>
+                <input type="text" id="custName" placeholder="e.g. Vikram Singhania" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" id="custPhone" placeholder="e.g. 9876543210" required>
+                  <small id="phoneDupHint" style="display: none; color: #f59e0b; font-weight: 600; margin-top: 4px;"></small>
+                </div>
+                <div class="form-group">
+                  <label>Location</label>
+                  <select id="custLocation">
+                    <option value="Gurgaon">Gurgaon</option>
+                    <option value="Goa">Goa</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Budget</label>
+                  <input type="text" id="custBudget" placeholder="e.g. ₹2.2 Cr or ₹85 Lakh" required>
+                </div>
+                <div class="form-group">
+                  <label>Channel Source</label>
+                  <select id="custSource">
+                    <option value="Website">Website</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="Advertisement">Advertisement</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-outline btn-block mt-2">+ Ingest Test Lead</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- System Reliability Simulator -->
+        <div class="card mt-4 border-warning">
+          <div class="card-header">
+            <h3>🛡️ Reliability & Circuit Breaker</h3>
+            <span class="badge badge-warning" id="crmStatusBadge">CRM Online</span>
+          </div>
+          <div class="card-body">
+            <p class="text-muted text-sm">Simulate CRM downtime (HTTP 503 / network timeout) to test the Dead Letter Queue & Google Sheet fallback buffer.</p>
+            <div class="toggle-control mt-3">
+              <label class="switch">
+                <input type="checkbox" id="toggleCrmFailure">
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label" id="toggleCrmLabel">Simulate CRM Downtime (Offline)</span>
+            </div>
+            <div class="buffer-status-box mt-3" id="bufferStatusBox" style="display: none;">
+              <div class="status-icon">⚠️</div>
+              <div class="status-msg">
+                <strong>Zero-Loss Buffer Active:</strong> CRM is currently unreachable. Leads are safely routed to <code>Raw_Ingestion_Audit</code> & <code>DLQ_Buffer</code> with exponential retry scheduled.
+              </div>
+              <button class="btn btn-sm btn-outline mt-2" id="btnDrainQueue">Replay Buffered Leads (Self-Heal)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Pipeline Visualizer & Output Tables -->
+      <div class="sim-main">
+        <!-- Live Processing Stepper -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h3>⚙️ Live Automation Execution Graph</h3>
+            <div class="stepper-status" id="stepperStatusText">Ready to process</div>
+          </div>
+          <div class="card-body">
+            <div class="pipeline-flow-steps">
+              <div class="flow-step" id="step1">
+                <div class="step-num">1</div>
+                <div class="step-info">
+                  <div class="step-title">Inbound Intake</div>
+                  <div class="step-desc">Webhooks & Normalization</div>
+                </div>
+              </div>
+              <div class="flow-connector">➔</div>
+              <div class="flow-step" id="step2">
+                <div class="step-num">2</div>
+                <div class="step-info">
+                  <div class="step-title">Raw Buffer</div>
+                  <div class="step-desc">Google Sheet Audit Log</div>
+                </div>
+              </div>
+              <div class="flow-connector">➔</div>
+              <div class="flow-step" id="step3">
+                <div class="step-num">3</div>
+                <div class="step-info">
+                  <div class="step-title">Deduplication</div>
+                  <div class="step-desc">Phone Search & Merge</div>
+                </div>
+              </div>
+              <div class="flow-connector">➔</div>
+              <div class="flow-step" id="step4">
+                <div class="step-num">4</div>
+                <div class="step-info">
+                  <div class="step-title">Priority Engine</div>
+                  <div class="step-desc">Gurgaon >= ₹1.5 Cr</div>
+                </div>
+              </div>
+              <div class="flow-connector">➔</div>
+              <div class="flow-step" id="step5">
+                <div class="step-num">5</div>
+                <div class="step-info">
+                  <div class="step-title">CRM & Alerts</div>
+                  <div class="step-desc">Routing & Notifications</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Views Tabs -->
+        <div class="card">
+          <div class="card-header output-tabs-header">
+            <div class="sub-tabs">
+              <button class="sub-tab active" data-sub="view-crm">Cleaned CRM Records (<span id="countCrm">0</span>)</button>
+              <button class="sub-tab" data-sub="view-dup">Duplicate Enquiries Log (<span id="countDup">0</span>)</button>
+              <button class="sub-tab" data-sub="view-vip">🔥 High-Priority Gurgaon (<span id="countVip">0</span>)</button>
+              <button class="sub-tab" data-sub="view-notifications">🔔 Real-time Alerts Dispatched (<span id="countAlerts">0</span>)</button>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnExportJson">Export JSON</button>
+          </div>
+          <div class="card-body">
+            <!-- View 1: Cleaned CRM Records -->
+            <div class="sub-view active" id="view-crm">
+              <div class="alert-banner mb-3" id="crmDuplicateAlertBanner" style="display: none; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>🔄 Duplicate Enquiry Intercepted & Merged:</strong>
+                  <span>Repeat submissions with the same phone numbers were merged into existing CRM profiles. No duplicate contacts created!</span>
+                </div>
+                <button class="btn btn-sm btn-outline" style="white-space: nowrap; margin-left: 1rem;" onclick="switchToDuplicatesTab()">View Duplicate Log ➔</button>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table" id="tableCrm">
+                  <thead>
+                    <tr>
+                      <th>Lead ID</th>
+                      <th>Prospect Name</th>
+                      <th>Phone</th>
+                      <th>Location</th>
+                      <th>Budget (Raw / INR)</th>
+                      <th>Sources & Touchpoints</th>
+                      <th>Priority Flag</th>
+                      <th>Follow-Up Status</th>
+                      <th>Assigned Advisory Team</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td colspan="9" class="text-center text-muted py-4">Click "Run Full Automation Pipeline" to process leads</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- View 2: Duplicate Enquiries Log -->
+            <div class="sub-view" id="view-dup">
+              <div class="alert-banner mb-3">
+                <strong>Why deduplicate?</strong> In real estate, buyers repeatedly submit forms on different ads. Creating new CRM records clutters pipeline metrics and causes multiple agents to call the same prospect. Instead, we append touchpoints to the existing master record.
+              </div>
+              <div class="table-responsive">
+                <table class="data-table" id="tableDup">
+                  <thead>
+                    <tr>
+                      <th>Duplicate ID</th>
+                      <th>Master Lead ID</th>
+                      <th>Prospect Name</th>
+                      <th>Phone</th>
+                      <th>New Source</th>
+                      <th>Location</th>
+                      <th>Duplicate Reason</th>
+                      <th>CRM Action Taken</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No duplicates processed yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- View 3: High-Priority Gurgaon -->
+            <div class="sub-view" id="view-vip">
+              <div class="vip-banner mb-3">
+                <div class="vip-badge">HIGH PRIORITY SLA: 15 MINUTES</div>
+                <p class="mb-0">Leads with <strong>Budget &ge; ₹1.5 Cr (15,000,000 INR)</strong> interested in <strong>Gurgaon</strong> are routed to Senior Advisors with urgent notifications.</p>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table" id="tableVip">
+                  <thead>
+                    <tr>
+                      <th>Lead ID</th>
+                      <th>Prospect</th>
+                      <th>Phone</th>
+                      <th>Location</th>
+                      <th>Budget</th>
+                      <th>Channel</th>
+                      <th>SLA Target</th>
+                      <th>Assigned Desk</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No VIP leads processed yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- View 4: Real-time Alerts -->
+            <div class="sub-view" id="view-notifications">
+              <div class="notifications-feed" id="notificationsFeed">
+                <div class="text-center text-muted py-4">Notifications will populate when leads are processed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- TAB 2: WORKFLOW ARCHITECTURE (TASK 1 & 3A) -->
+  <section class="tab-content" id="tab-workflow">
+    <div class="doc-container">
+      <div class="doc-header">
+        <span class="badge">TASK 1 & TASK 3 (OPTION A)</span>
+        <h2>End-to-End Real Estate Lead Management Architecture</h2>
+        <p class="lead-text">Complete workflow design for Proppr covering multi-source ingestion, storage, deduplication, team notifications, follow-up status lifecycle, and fault tolerance.</p>
+      </div>
+
+      <!-- Architecture Diagram Visual -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>📐 Visual Workflow Pipeline Architecture</h3>
+          <span class="badge badge-success">Engine: n8n / Make / Webhooks</span>
+        </div>
+        <div class="card-body">
+          <div class="arch-diagram">
+            <div class="diagram-column">
+              <div class="diagram-box header-box">1. Inbound Sources</div>
+              <div class="diagram-node source-node">🌐 Website Forms (Webflow/WP)</div>
+              <div class="diagram-node source-node">💬 WhatsApp Business (Interakt/Wati)</div>
+              <div class="diagram-node source-node">📱 Meta & Google Ads (Lead Forms)</div>
+            </div>
+
+            <div class="diagram-arrow">➔</div>
+
+            <div class="diagram-column">
+              <div class="diagram-box header-box">2. Ingestion & Normalizer</div>
+              <div class="diagram-node proc-node">⚡ HTTPS Webhook Listener</div>
+              <div class="diagram-node proc-node">🧹 Phone Normalizer (E.164 / 10-digit)</div>
+              <div class="diagram-node proc-node">💰 Indian Currency Parser (Cr / Lakh)</div>
+              <div class="diagram-node storage-node">📊 Buffer to Google Sheets Audit Log</div>
+            </div>
+
+            <div class="diagram-arrow">➔</div>
+
+            <div class="diagram-column">
+              <div class="diagram-box header-box">3. Deduplication Engine</div>
+              <div class="diagram-node check-node">🔍 Search CRM by Phone</div>
+              <div class="diagram-node branch-node">
+                <strong>Decision: Duplicate Found?</strong>
+                <div class="branch-split">
+                  <span class="text-warning">YES: Touchpoint Append</span>
+                  <span class="text-success">NO: Create Contact</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="diagram-arrow">➔</div>
+
+            <div class="diagram-column">
+              <div class="diagram-box header-box">4. Priority & Routing</div>
+              <div class="diagram-node filter-node">🎯 Budget &ge; ₹1.5 Cr & Gurgaon?</div>
+              <div class="diagram-node vip-node">🚨 VIP Route: Gurgaon Senior Desk</div>
+              <div class="diagram-node std-node">🌴 Regional Desk: Goa / Standard</div>
+            </div>
+
+            <div class="diagram-arrow">➔</div>
+
+            <div class="diagram-column">
+              <div class="diagram-box header-box">5. CRM & Notifications</div>
+              <div class="diagram-node crm-node">📂 HubSpot / Zoho CRM Record</div>
+              <div class="diagram-node notify-node">💬 Slack Channel Notification</div>
+              <div class="diagram-node notify-node">📲 Instant WhatsApp Lead Greeting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Breakdown Cards -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3>1. Lead Ingestion & Data Standardization</h3>
+          </div>
+          <div class="card-body">
+            <ul class="feature-list">
+              <li><strong>Inbound Webhook Triggers:</strong> Direct RESTful HTTPS Webhooks listen for payloads from Website form submissions, Meta Graph API LeadGen webhooks, and WhatsApp Business API gateways (Interakt, Wati, Gupshup).</li>
+              <li><strong>Payload Normalization:</strong>
+                <ul>
+                  <li><code>phone_number</code>: Strips whitespace, hyphens, and standardizes <code>+91</code> or leading <code>0</code> into canonical 10-digit format (e.g., <code>9876543210</code>).</li>
+                  <li><code>budget</code>: Parsed by our regex parser into integer INR (e.g. <code>₹1.5 Cr</code> &rarr; <code>15,000,000</code>; <code>₹90 Lakh</code> &rarr; <code>9,000,000</code>).</li>
+                  <li><code>enquiry_date</code>: Stamped with UTC ISO timestamp and local IST timestamp.</li>
+                </ul>
+              </li>
+              <li><strong>Zero-Loss Staging Buffer:</strong> Every raw payload is immediately appended to an audit Google Sheet (<code>Raw_Ingestion_Audit</code>) <em>before</em> calling external CRM APIs. If CRM is down, no lead is ever lost.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>2. Deduplication Strategy</h3>
+          </div>
+          <div class="card-body">
+            <ul class="feature-list">
+              <li><strong>Unique Identifier:</strong> Normalized 10-digit phone number is the primary key (supplemented by email if available).</li>
+              <li><strong>The "Search-Before-Insert" Pattern:</strong>
+                <ul>
+                  <li>Before creating a CRM Contact, query CRM via <code>GET /contacts/search?phone={phone}</code>.</li>
+                  <li><strong>If Exists:</strong> Do NOT create a duplicate contact. Instead, create an <em>Engagement Note / Activity</em> under the existing contact ID (e.g. <em>"Repeat enquiry from Advertisement on 2026-10-28 for Gurgaon"</em>).</li>
+                  <li>Increment <code>touchpoint_count</code> and update <code>last_enquiry_date</code>.</li>
+                  <li>Alert the already assigned sales representative so they can follow up with updated context.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>3. Team Notification & Smart Routing</h3>
+          </div>
+          <div class="card-body">
+            <ul class="feature-list">
+              <li><strong>Location-Based Routing:</strong>
+                <ul>
+                  <li><strong>Goa:</strong> Routed to <em>Goa Holiday & Luxury Advisory Desk</em> (Slack channel <code>#leads-goa</code>).</li>
+                  <li><strong>Gurgaon:</strong> Routed based on budget tier.</li>
+                </ul>
+              </li>
+              <li><strong>High-Priority Gurgaon VIP Routing:</strong>
+                <ul>
+                  <li>Condition: <code>Budget &ge; ₹1.5 Cr</code> AND <code>Location == 'Gurgaon'</code>.</li>
+                  <li>Tagged with <code>Priority: HIGH</code>, SLA: <strong>15 Minutes</strong>.</li>
+                  <li>Instant alert to <code>#leads-gurgaon-vip</code> tagging Senior Brokers + SMS/WhatsApp notification directly to the on-duty team lead.</li>
+                </ul>
+              </li>
+              <li><strong>Automated Customer Acknowledgement:</strong>
+                <ul>
+                  <li>Sends instant WhatsApp greeting: <em>"Hi Rahul, thank you for reaching out to Proppr regarding Gurgaon luxury properties. Our Senior Advisor has been assigned to your enquiry..."</em></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>4. Error Handling & Failure Resilience</h3>
+          </div>
+          <div class="card-body">
+            <ul class="feature-list">
+              <li><strong>Dead Letter Queue (DLQ):</strong> Any failing node automatically diverts the execution to an Error Trigger node.</li>
+              <li><strong>Payload Preservation:</strong> The failed payload, node name, and stack trace are appended to a <code>Failed_Leads_DLQ</code> Google Sheet.</li>
+              <li><strong>Automated Retries:</strong> Exponential backoff retry policy (Attempt 1: 1 min, Attempt 2: 5 min, Attempt 3: 15 min).</li>
+              <li><strong>Tech Alerting:</strong> Real-time Slack alert sent to <code>#ops-automation-alerts</code> with a one-click manual retry button for DevOps/Ops leads.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- n8n Exportable JSON Blueprint Viewer -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3>📦 Exportable n8n Workflow Blueprint</h3>
+          <span class="badge badge-info">File: workflows/n8n_proppr_lead_workflow.json</span>
+        </div>
+        <div class="card-body">
+          <p class="text-muted text-sm mb-3">This production-ready workflow can be imported directly into any n8n instance via <strong>Workflows &rarr; Import from File / URL</strong>.</p>
+          <div class="code-preview-box">
+            <pre><code id="n8nJsonPreview">Loading n8n blueprint preview...</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: AUTOMATION LOGIC & Q&A (TASK 2) -->
+  <section class="tab-content" id="tab-task2">
+    <div class="doc-container">
+      <div class="doc-header">
+        <span class="badge">TASK 2</span>
+        <h2>Demonstration of Automation Logic & Analysis</h2>
+        <p class="lead-text">Deep-dive technical answers to the 5 core automation logic questions evaluated on the 4 sample leads.</p>
+      </div>
+
+      <!-- Sample Leads Reference Table -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>📋 Sample Leads Dataset</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Lead ID</th>
+                  <th>Name</th>
+                  <th>Phone Number</th>
+                  <th>Location</th>
+                  <th>Budget</th>
+                  <th>Source</th>
+                  <th>Analysis Summary</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="highlight-row">
+                  <td><strong>101</strong></td>
+                  <td>Rahul Sharma</td>
+                  <td><code>9876543210</code></td>
+                  <td>Gurgaon</td>
+                  <td>₹1.5 Cr</td>
+                  <td><span class="badge badge-source">Website</span></td>
+                  <td><strong>Primary Master Lead</strong> (High Priority Gurgaon VIP &ge; ₹1.5 Cr)</td>
+                </tr>
+                <tr>
+                  <td><strong>102</strong></td>
+                  <td>Priya Mehta</td>
+                  <td><code>9876543211</code></td>
+                  <td>Goa</td>
+                  <td>₹90 Lakh</td>
+                  <td><span class="badge badge-source">WhatsApp</span></td>
+                  <td>Unique Lead &rarr; Routed to <strong>Goa Holiday & Luxury Desk</strong></td>
+                </tr>
+                <tr class="highlight-row-warning">
+                  <td><strong>103</strong></td>
+                  <td>Rahul Sharma</td>
+                  <td><code>9876543210</code></td>
+                  <td>Gurgaon</td>
+                  <td>₹1.5 Cr</td>
+                  <td><span class="badge badge-source">Advertisement</span></td>
+                  <td><strong class="text-warning">DUPLICATE OF LEAD 101</strong> (Same phone number: 9876543210)</td>
+                </tr>
+                <tr class="highlight-row">
+                  <td><strong>104</strong></td>
+                  <td>Amit Verma</td>
+                  <td><code>9876543212</code></td>
+                  <td>Gurgaon</td>
+                  <td>₹2 Cr</td>
+                  <td><span class="badge badge-source">Website</span></td>
+                  <td>Unique Lead &rarr; <strong>High Priority Gurgaon VIP</strong> (₹2 Cr &ge; ₹1.5 Cr)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q&A Accordion/Cards -->
+      <div class="qa-grid">
+        <!-- Question 1 -->
+        <div class="card qa-card">
+          <div class="card-header">
+            <h4>Q1: Which leads would you flag as potential duplicates, and why?</h4>
+          </div>
+          <div class="card-body">
+            <p><strong>Answer: Lead 101 and Lead 103</strong> are flagged as duplicates.</p>
+            <ul>
+              <li><strong>Why:</strong> Both enquiries share the exact same normalized phone number: <code>9876543210</code> and the same prospect name (<em>Rahul Sharma</em>).</li>
+              <li><strong>Real Estate Context:</strong> Lead 101 submitted an enquiry through the <em>Website</em>, and later Lead 103 submitted an enquiry through an online <em>Advertisement</em> (e.g. Meta / Google Ads).</li>
+              <li>In high-involvement purchases like real estate, buyers frequently interact with multiple channels before finalizing a site visit. Treating Lead 103 as a new contact would result in two different sales agents calling the same client, leading to a fragmented customer experience and internal commission conflicts.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="card qa-card">
+          <div class="card-header">
+            <h4>Q2: How would you ensure duplicate enquiries do not create unnecessary CRM records?</h4>
+          </div>
+          <div class="card-body">
+            <p><strong>Answer: Implementing the "Search-Before-Insert / Upsert Pattern"</strong> with an architectural separation between <em>Contacts</em> and <em>Enquiries/Activities</em>:</p>
+            <ol>
+              <li><strong>Phone Number as Unique Key:</strong> Phone number is indexed with a unique constraint in the CRM Contact object.</li>
+              <li><strong>Lookup Step:</strong> When a new enquiry arrives, the workflow executes a lookup:
+                <pre class="inline-code">contact = crm.searchContactByPhone(normalized_phone)</pre>
+              </li>
+              <li><strong>Forking Logic:</strong>
+                <ul>
+                  <li><strong>If Not Found:</strong> Create a new Contact record with status <code>New</code>.</li>
+                  <li><strong>If Found:</strong> Do <em>not</em> insert a new Contact. Instead:
+                    <ol>
+                      <li>Append an <strong>Enquiry Note / Timeline Activity</strong> to the existing Contact: <em>"Repeat enquiry received via Advertisement on 2026-10-28 for Gurgaon (₹1.5 Cr)"</em>.</li>
+                      <li>Increment <code>touchpoint_count</code> and update <code>last_enquiry_date</code>.</li>
+                      <li>Check current Contact status: If status is <code>Closed - Lost</code> or inactive &gt; 30 days, re-open status to <code>Re-engaged</code>. If actively in progress, leave status intact and send a Slack notification to the assigned advisor.</li>
+                    </ol>
+                  </li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="card qa-card">
+          <div class="card-header">
+            <h4>Q3: If a lead has a budget of ₹1.5 Cr or above and is interested in Gurgaon, how would you flag it for priority follow-up?</h4>
+          </div>
+          <div class="card-body">
+            <p><strong>Answer: Numerical Currency Parsing + Conditional Routing:</strong></p>
+            <ol>
+              <li><strong>Budget Normalization:</strong> Real estate budgets arrive in colloquial formats (<code>₹1.5 Cr</code>, <code>₹90 Lakh</code>, <code>₹2 Cr</code>). We parse these into standard numerical INR integers:
+                <ul>
+                  <li><code>₹1.5 Cr</code> &rarr; <code>15,000,000</code></li>
+                  <li><code>₹90 Lakh</code> &rarr; <code>9,000,000</code></li>
+                  <li><code>₹2 Cr</code> &rarr; <code>20,000,000</code></li>
+                </ul>
+              </li>
+              <li><strong>Filter Evaluation:</strong>
+                <pre class="inline-code">is_priority = (budget_inr >= 15000000) && (location.toLowerCase() == "gurgaon")</pre>
+              </li>
+              <li><strong>Outcomes for Sample Leads:</strong>
+                <ul>
+                  <li><strong>Lead 101 (Rahul Sharma):</strong> Gurgaon + 15,000,000 &rarr; <span class="badge badge-danger">HIGH PRIORITY VIP</span></li>
+                  <li><strong>Lead 102 (Priya Mehta):</strong> Goa + 9,000,000 &rarr; <span class="badge badge-info">Standard (Goa Desk)</span></li>
+                  <li><strong>Lead 103 (Rahul Sharma):</strong> Duplicate of 101 &rarr; Reinforced priority touchpoint</li>
+                  <li><strong>Lead 104 (Amit Verma):</strong> Gurgaon + 20,000,000 &rarr; <span class="badge badge-danger">HIGH PRIORITY VIP</span></li>
+                </ul>
+              </li>
+              <li><strong>Automated Actions on Priority Flag:</strong>
+                <ul>
+                  <li>CRM field <code>Priority = "HIGH"</code>, <code>SLA_Target = "15 Minutes"</code>.</li>
+                  <li>Urgent alert to Slack channel <code>#leads-gurgaon-vip</code> tagging the Senior Advisory team.</li>
+                  <li>Automated VIP SMS / WhatsApp acknowledgement sent to the lead within 60 seconds.</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="card qa-card">
+          <div class="card-header">
+            <h4>Q4: What would you do if the CRM was unavailable when a new lead arrived?</h4>
+          </div>
+          <div class="card-body">
+            <p><strong>Answer: Decoupled Staging Buffer + Circuit Breaker + Replay Queue:</strong></p>
+            <ol>
+              <li><strong>Asynchronous Ingestion (Never synchronous point-to-point):</strong>
+                <ul>
+                  <li>When an ad or webhook fires, the webhook listener immediately responds with <code>HTTP 200 / 202 Accepted</code> so Meta/Google/WhatsApp do not terminate or retry aggressively.</li>
+                  <li>The raw payload is written immediately to a reliable persistence layer (e.g., <strong>Google Sheets Staging Log</strong>, Redis, or AWS SQS) with sync status <code>PENDING_CRM_SYNC</code>.</li>
+                </ul>
+              </li>
+              <li><strong>Circuit Breaker & Exponential Backoff:</strong>
+                <ul>
+                  <li>If the CRM responds with HTTP <code>500</code>, <code>503</code>, or connection timeout, the automation engine intercepts the error and schedules automated retries (e.g., Retry 1 after 1m, Retry 2 after 5m, Retry 3 after 15m).</li>
+                </ul>
+              </li>
+              <li><strong>Dead Letter Queue (DLQ) & Reconciliation Cron:</strong>
+                <ul>
+                  <li>If CRM remains down after max retries, the record is flagged in the <code>Failed_Leads_DLQ</code> sheet and a high-priority alert is sent to <code>#tech-ops-alerts</code>.</li>
+                  <li>A scheduled reconciliation cron job runs every 30 minutes to check CRM health; as soon as CRM returns HTTP 200, it automatically replays and syncs all pending records in FIFO order. <strong>Zero leads are lost.</strong></li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="card qa-card">
+          <div class="card-header">
+            <h4>Q5: How would you prevent a failed workflow from processing the same lead multiple times?</h4>
+          </div>
+          <div class="card-body">
+            <p><strong>Answer: Idempotency Keys + Checkpointing State Machine:</strong></p>
+            <ol>
+              <li><strong>Deterministic Idempotency Key:</strong>
+                <ul>
+                  <li>Every lead is tagged with a unique hash:
+                    <pre class="inline-code">idempotency_key = SHA256(phone + source + enquiry_date)</pre>
+                  </li>
+                  <li>For Meta Ads or WhatsApp, we utilize the provider's native unique ID (e.g. Meta <code>leadgen_id</code> or WhatsApp <code>message_id</code>).</li>
+                </ul>
+              </li>
+              <li><strong>Atomic State Tracking (Checkpointing):</strong>
+                <ul>
+                  <li>Each processing stage updates an explicit state:
+                    <pre class="inline-code">[INGESTED] &rarr; [BUFFERED] &rarr; [CRM_SYNCED] &rarr; [NOTIFIED] &rarr; [COMPLETED]</pre>
+                  </li>
+                </ul>
+              </li>
+              <li><strong>Pre-Execution Guard:</strong>
+                <ul>
+                  <li>Before creating a CRM contact or sending a client WhatsApp/SMS, the workflow queries the state store for <code>idempotency_key</code>. If status is already <code>COMPLETED</code> or <code>CRM_SYNCED</code>, execution exits gracefully without duplicating side-effects.</li>
+                  <li>If a workflow fails halfway (e.g., written to Google Sheets, but CRM timeout), the retry mechanism resumes <em>only</em> from the uncompleted stage (CRM sync), preventing duplicate rows in Google Sheets or multiple greeting messages to the client.</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: CODE IMPLEMENTATION (TASK 3B) -->
+  <section class="tab-content" id="tab-code">
+    <div class="doc-container">
+      <div class="doc-header">
+        <span class="badge">TASK 3 (OPTION B)</span>
+        <h2>Production Code Implementation (Python & JavaScript)</h2>
+        <p class="lead-text">Clean, modular, fully tested script that ingests sample leads, normalizes phone numbers, parses Indian currency, flags high-priority leads, and isolates duplicates.</p>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>🐍 Python Implementation (<code>scripts/lead_processor.py</code>)</h3>
+          <span class="badge badge-success">Tested with Python 3.13 • 100% Passing Tests</span>
+        </div>
+        <div class="card-body">
+          <div class="code-preview-box">
+            <pre><code class="language-python"># Excerpt from scripts/lead_processor.py
+import re
+from typing import Dict, List, Tuple, Any
+
+def normalize_phone(phone_raw: Any) -> str:
+    """Standardizes Indian phone numbers into canonical 10-digit format."""
+    digits = re.sub(r"\D", "", str(phone_raw))
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[2:]
+    elif len(digits) == 11 and digits.startswith("0"):
+        digits = digits[1:]
+    return digits
+
+def parse_indian_budget(budget_str: Any) -> float:
+    """Parses ₹1.5 Cr, ₹90 Lakh, ₹2 Cr into numerical INR values."""
+    text = str(budget_str).strip().lower()
+    num_match = re.search(r"(\d+(?:\.\d+)?)", text)
+    if not num_match:
+        return 0.0
+    value = float(num_match.group(1))
+    if "cr" in text or "crore" in text:
+        return value * 10_000_000
+    elif "lakh" in text or "lac" in text or "l" in text:
+        return value * 100_000
+    return value
+
+def evaluate_priority(location: str, budget_inr: float) -> Tuple[bool, str]:
+    """Flag: Budget >= ₹1.5 Cr (15M INR) AND Location is 'Gurgaon'."""
+    is_gurgaon = location.strip().lower() == "gurgaon"
+    meets_budget = budget_inr >= 15_000_000
+    if is_gurgaon and meets_budget:
+        return True, "HIGH PRIORITY (Gurgaon >= ₹1.5 Cr)"
+    return False, "STANDARD"
+</code></pre>
+          </div>
+          <div class="mt-3">
+            <a href="scripts/lead_processor.py" download class="btn btn-outline btn-sm">Download lead_processor.py</a>
+            <a href="scripts/cleaned_leads.json" download class="btn btn-outline btn-sm">Download cleaned_leads.json</a>
+            <a href="scripts/duplicate_leads.json" download class="btn btn-outline btn-sm">Download duplicate_leads.json</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: TEAM OPERATIONS GUIDE (TASK 4) -->
+  <section class="tab-content" id="tab-team-docs">
+    <div class="doc-container">
+      <div class="doc-header">
+        <span class="badge">TASK 4</span>
+        <h2>Team Guide: How Proppr's Lead Automation Works</h2>
+        <p class="lead-text">A simple, jargon-free operational handbook prepared for real estate advisors, sales executives, and operations managers.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3>1. What the Automation Does</h3>
+          </div>
+          <div class="card-body">
+            <p>Think of this automation as your <strong>24/7 Digital Concierge</strong>:</p>
+            <ul>
+              <li><strong>Zero Manual Data Entry:</strong> Whenever a prospective property buyer reaches out—whether they fill a form on our website, message us on WhatsApp, or click one of our Facebook/Instagram ads—their details are instantly captured without anyone needing to copy-paste.</li>
+              <li><strong>Smart Deduplication:</strong> If a customer enquired yesterday on our website and clicks an advertisement today, the system recognizes them by their phone number. It doesn't create a confusing second record or assign them to a different broker; it adds an update to their existing profile so you know they are highly interested.</li>
+              <li><strong>Instant VIP Prioritization:</strong> When an enquiry comes in for Gurgaon with a budget of <strong>₹1.5 Crore or above</strong>, the system flags it as <em>High Priority</em>, alerts the Gurgaon Senior Advisory desk immediately, and sends a warm acknowledgement message to the buyer in seconds.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>2. How the Team Will Use It Day-to-Day</h3>
+          </div>
+          <div class="card-body">
+            <p>Your daily routine becomes smooth, fast, and organized:</p>
+            <ul>
+              <li><strong>Instant Slack / WhatsApp Alerts:</strong> You will receive a message in your team channel (e.g. <code>#leads-gurgaon</code> or <code>#leads-goa</code>) the exact second a lead submits an enquiry, complete with their name, budget, and direct CRM link.</li>
+              <li><strong>Clear Lead Status Lifecycle:</strong>
+                <ul>
+                  <li><code>New</code>: Brand new lead waiting for your first call.</li>
+                  <li><code>Contacted</code>: You have called or messaged them.</li>
+                  <li><code>Qualified</code>: Buyer intent, location preference, and budget are confirmed.</li>
+                  <li><code>Site Visit Scheduled</code>: Site tour booked.</li>
+                  <li><code>Closed</code>: Deal completed or closed.</li>
+                </ul>
+              </li>
+              <li><strong>No Client Collisions:</strong> Since each phone number is unique, you will never have two advisors calling the same client by mistake.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>3. What Happens When Something Goes Wrong</h3>
+          </div>
+          <div class="card-body">
+            <p>You can rest easy knowing that <strong>no lead will ever slip through the cracks</strong>:</p>
+            <ul>
+              <li><strong>Safety Backup Sheet:</strong> Every enquiry is instantly written to a backup Google Sheet the moment it arrives. Even if our CRM or internet experiences a temporary outage, your leads are 100% safe.</li>
+              <li><strong>Automatic Retries:</strong> If the CRM system is busy or temporarily offline, our automation silently waits and automatically tries sending the lead again after 1 minute, 5 minutes, and 15 minutes.</li>
+              <li><strong>Instant Ops Alert:</strong> If an error still occurs, our technical operations channel is notified immediately with the lead's details so an advisor can manually call them right away while the tech team investigates.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>4. Future Improvements & Next Steps</h3>
+          </div>
+          <div class="card-body">
+            <p>Exciting enhancements we can add in Phase 2:</p>
+            <ul>
+              <li><strong>AI WhatsApp Concierge:</strong> An interactive AI assistant on WhatsApp that instantly qualifies buyers (e.g., asking <em>"Are you looking for 3BHK or 4BHK?"</em> or <em>"Ready to move or under construction?"</em>) before routing to an advisor.</li>
+              <li><strong>Automated Property Shortlisting:</strong> Automatically send matching Gurgaon or Goa property brochures as a branded PDF over WhatsApp based on their exact budget and location.</li>
+              <li><strong>Round-Robin Auto-Assignment:</strong> Fairly distribute standard leads among sales reps based on working hours and current active lead capacity.</li>
+              <li><strong>Site Visit Scheduling Calendar:</strong> Allow buyers to pick a site visit slot directly from a WhatsApp interactive button.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <strong>Proppr Real Estate Advisory</strong> • Gurgaon & Goa Markets
+      </div>
+      <div class="footer-right">
+        Automation Assignment Submission • Designed with Resilience, Idempotency & Care
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
